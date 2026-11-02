@@ -1,0 +1,39 @@
+name: release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions: {}
+# Never run two releases at once (they would race on the gh-pages index).
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+  release:
+    needs: test
+    # A manual run from another branch must never release.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Configure git identity
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      # Packages every chart whose Chart.yaml version has no GitHub release
+      # yet, creates the release and updates index.yaml on gh-pages.
+      - uses: helm/chart-releaser-action@92c6b97fa9f664492a2592e0d1d80bc6bf378957 # v1.9.0
+        with:
+          charts_dir: .
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

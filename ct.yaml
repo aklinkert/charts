@@ -1,0 +1,5 @@
+chart-dirs:
+  - .
+target-branch: main
+# No maintainers metadata in Chart.yaml; ct would otherwise look them up on GitHub.
+validate-maintainers: false
