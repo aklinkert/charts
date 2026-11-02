@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  secret:
+  - apiVersion: v2
+    created: "2026-11-02T12:26:35.681567015Z"
+    description: Renders a Kubernetes Secret from plain-text values and base64-encodes
+      them
+    digest: 75be8b5eb5a01107639cb45888b6cfc752f1d59b1f34c885038b735d9ca9d5dc
+    name: secret
+    type: application
+    urls:
+    - https://github.com/aklinkert/charts/releases/download/secret-0.2.0/secret-0.2.0.tgz
+    version: 0.2.0
+generated: "2026-11-02T12:26:35.681577331Z"
