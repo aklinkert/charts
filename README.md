@@ -14,13 +14,14 @@ Helm charts, published to GitHub Pages with
 ```sh
 helm repo add aklinkert https://aklinkert.github.io/charts
 helm repo update
-helm install my-secret aklinkert/secret --set data.password=s3cret
+helm install db aklinkert/secret --set data.password=s3cret  # creates db-secret
 ```
 
 ## Chart: secret
 
-Creates one `Secret` named `<release>-secret` (or `fullnameOverride`). Values
-under `data` are plain text; the chart base64-encodes them.
+Creates one `Secret`. Its name is `<release>-secret`, or just `<release>` if
+the release name already contains `secret`; `fullnameOverride` wins over both.
+Values under `data` are plain text; the chart base64-encodes them.
 
 | Value | Default | Description |
 | ----- | ------- | ----------- |
@@ -41,5 +42,10 @@ secret manager for sensitive data.
 ## Development
 
 Pull requests run `helm lint` and `ct lint` and must bump the chart `version`
-in `Chart.yaml`. Pushes to `main` publish every chart version that has no
-release yet.
+in `Chart.yaml`. Pushes to `main` package every chart and publish each version that has no
+release yet (existing versions are skipped).
+
+## Changelog
+
+- 0.2.0: removed the placeholder `appVersion`, so the
+  `app.kubernetes.io/version` label is no longer set.

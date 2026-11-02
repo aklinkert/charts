@@ -30,10 +30,12 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-      # Packages every chart whose Chart.yaml version has no GitHub release
-      # yet, creates the release and updates index.yaml on gh-pages.
+      # Packages every chart, uploads a GitHub release per chart version and
+      # updates index.yaml on gh-pages. skip_existing leaves versions that
+      # are already released untouched instead of failing.
       - uses: helm/chart-releaser-action@92c6b97fa9f664492a2592e0d1d80bc6bf378957 # v1.9.0
         with:
           charts_dir: .
+          skip_existing: "true"
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
