@@ -1,0 +1,48 @@
+name: test
+on:
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # renovate: datasource=github-releases depName=helm/helm
+      HELM_VERSION: v4.3.1
+      # renovate: datasource=github-releases depName=helm/chart-testing
+      CT_VERSION: v3.15.0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - uses: helm/chart-testing-action@720270857a28afd41e2426521a7801db09e9b510 # v2.9.0
+        with:
+          version: ${{ env.CT_VERSION }}
+      - name: helm lint
+        run: |
+          for chart in */Chart.yaml; do
+            helm lint "$(dirname "$chart")"
+          done
+      - name: Render the charts
+        run: |
+          for chart in */Chart.yaml; do
+            helm template test "$(dirname "$chart")" > /dev/null
+          done
+      # Pull requests only lint the changed charts and must bump the chart
+      # version (chart-releaser publishes by Chart.yaml version). Other runs
+      # (the release workflow) lint everything.
+      - name: ct lint
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            ct lint --config ct.yaml
+          else
+            ct lint --config ct.yaml --all --check-version-increment=false
+          fi
